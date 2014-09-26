@@ -324,14 +324,14 @@ feature {}
          cpp.pending_c_function_signature.append(once "void bdw_weakref_setlink(bdw_Twr*wr,T0*r)")
          cpp.pending_c_function_body.append(once "GC_disable();%N%
                                                  %if(wr->o)GC_unregister_disappearing_link((void**)&(wr->o));%N%
-                                                 %wr->o=r;%N%
+                                                 %wr->o=GC_HIDE_POINTER(r);%N%
                                                  %if(r)GC_GENERAL_REGISTER_DISAPPEARING_LINK((void**)&(wr->o),(void*)r);%N%
                                                  %GC_enable();%N")
          cpp.dump_pending_c_function(True)
 
          cpp.prepare_c_function
          cpp.pending_c_function_signature.append(once "T0*bdw_weakref_getlink(bdw_Twr*wr)")
-         cpp.pending_c_function_body.append(once "return wr->o;%N")
+         cpp.pending_c_function_body.append(once "return GC_REVEAL_POINTER(wr->o);%N")
          cpp.dump_pending_c_function(True)
 
          cpp.prepare_c_function
