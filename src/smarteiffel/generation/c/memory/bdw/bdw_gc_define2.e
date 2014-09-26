@@ -372,7 +372,7 @@ feature {}
                                                  %GC_REGISTER_FINALIZER_NO_ORDER(markna,(GC_finalization_proc)bdw_na_markT")
          live_type.id.append_in(cpp.pending_c_function_body)
          cpp.pending_c_function_body.append(once ",NULL,NULL,NULL);%N%
-                                                 %o->bdw_markna=(void*)HIDE_POINTER(markna);%N%
+                                                 %o->bdw_markna=(void*)GC_HIDE_POINTER(markna);%N%
                                                  %*markna=(T0*)o;%N%
                                                  %GC_GENERAL_REGISTER_DISAPPEARING_LINK(&(o->bdw_markna),markna);%N%
                                                  %bdw_in_assign=0;%N%
@@ -434,7 +434,7 @@ feature {}
                      cpp.pending_c_function_body.append(a.name.to_string)
                      cpp.pending_c_function_body.append(once ";%N%
                                                              %if(na)for(i=0;i<c;i++){%N%
-                                                             %e=na[i];if(e)na[i]=(T0*)HIDE_POINTER(e);}%N")
+                                                             %e=na[i];if(e)na[i]=(T0*)GC_HIDE_POINTER(e);}%N")
                   end
                end
                i := i + 1
