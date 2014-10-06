@@ -4,11 +4,14 @@ include "config.php";
 include "functions.php";
 setlocale(LC_ALL, 'en_US.utf8');
 
-// store active commits for stage history
-// grep warnings (eiffel and C compiler) from eiffeltest output
-// add email notification
-// todo: add IRC handling: http://oreilly.com/pub/h/1963
-// todo: add -Wall compiler option
+// TODO:
+// * store active commits for stage history
+// * grep warnings (eiffel and C compiler) from eiffeltest output
+// * add email notification
+// * add IRC handling: http://oreilly.com/pub/h/1963
+// * add -Wall compiler option
+// * add all tools to be executed in all_check mode and execute on et32
+// * synchronize git between et64 and et32
 
 $force = false;
 $verbose = false;
@@ -217,6 +220,13 @@ if (substage("debian packaging")) {
    endsubstage();
 }
 
+// do after debian packaging as git is already fetched then
+if (substage("start assertion checking")) {
+   execute("$LibertyBase/work/build_doc.sh -plain", $ulimit_time = 3600);
+   file_put_contents($stagedir ."/result.txt", $pkg_result);
+   endsubstage();
+}
+
 function tutorialDir($dir) {
    global $stagedir;
    global $dateFormat;
@@ -373,6 +383,13 @@ function testDir($dir) {
 }
 if (substage("TestSuite")) {
    testDir("$LibertyBase/test");
+   endsubstage();
+}
+
+// fetch the results from the assertin checking phase on et32
+if (substage("finish assertion checking")) {
+//   execute("$LibertyBase/work/build_doc.sh -plain", $ulimit_time = 3600);
+   file_put_contents($stagedir ."/result.txt", fetch result file from et32 -> and store here);
    endsubstage();
 }
 
