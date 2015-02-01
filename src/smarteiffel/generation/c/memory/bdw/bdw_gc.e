@@ -273,25 +273,34 @@ feature {C_NATIVE_PROCEDURE_MAPPER}
       local
          elt_type: TYPE
       do
+
          cpp.pending_c_function_body.append(once "/*mark_item*/")
          elt_type := rf7.arguments.name(1).resolve_in(rf7.type_of_current).generic_list.first
          if elt_type.is_reference then
-            cpp.pending_c_function_body.append(once "if(")
-            cpp.put_ith_argument(1)
-            cpp.pending_c_function_body.append(once "[")
-            cpp.put_ith_argument(2)
-            cpp.pending_c_function_body.append(once "]!=NULL)")
-            cpp.put_ith_argument(1)
-            cpp.pending_c_function_body.append(once "[")
-            cpp.put_ith_argument(2)
-            cpp.pending_c_function_body.append(once "]=(")
-            cpp.pending_c_function_body.append(cpp.argument_type.for(elt_type.canonical_type_mark))
-            cpp.pending_c_function_body.append(once ")REVEAL_POINTER(")
-            cpp.put_ith_argument(1)
-            cpp.pending_c_function_body.append(once "[")
-            cpp.put_ith_argument(2)
-            cpp.pending_c_function_body.append(once "]);%N")
-         end
+--            cpp.pending_c_function_body.append(once "GC_MARK_AND_PUSH(")
+--            cpp.put_ith_argument(1)
+--            cpp.pending_c_function_body.append(once "[")
+--            cpp.put_ith_argument(2)
+--            cpp.pending_c_function_body.append(once "]);")
+            
+--            cpp.pending_c_function_body.append(once "if(")
+--            cpp.put_ith_argument(1) -- (/*RF2:storage*/(C)->_storage/*Tniiiii*//*:RF2*/)
+--            cpp.pending_c_function_body.append(once "[")
+--            cpp.put_ith_argument(2) -- _i
+--            cpp.pending_c_function_body.append(once "]!=NULL)")
+--            cpp.put_ith_argument(1) -- (/*RF2:storage*/(C)->_storage/*Tniiiii*//*:RF2*/)
+--            cpp.pending_c_function_body.append(once "[")
+--            cpp.put_ith_argument(2) -- _i
+--            cpp.pending_c_function_body.append(once "]=(")
+--            cpp.pending_c_function_body.append(cpp.argument_type.for(elt_type.canonical_type_mark))
+--            cpp.pending_c_function_body.append(once ")REVEAL_POINTER(")
+--            cpp.put_ith_argument(1) -- (/*RF2:storage*/(C)->_storage/*Tniiiii*//*:RF2*/)
+--            cpp.pending_c_function_body.append(once "[")
+--            cpp.put_ith_argument(2) -- _i
+--            cpp.pending_c_function_body.append(once "]);%N")
+            end
+            -- Rmk: todo: check: what if we have a 
+            -- NATIVE_ARRAY[expanded_type_containing_references]
       end
 
 feature {C_PRETTY_PRINTER}

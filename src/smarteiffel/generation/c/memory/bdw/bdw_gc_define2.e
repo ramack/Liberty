@@ -276,7 +276,11 @@ feature {}
          cpp.pending_c_function_body.append(cpp.target_type.for(tm))
          cpp.pending_c_function_body.append(once " R=(")
          cpp.pending_c_function_body.append(cpp.target_type.for(tm))
+         -- Rmk: GC_MALOC_ATOMIC
+         -- probably not atomic... as specific mark functions should 
+         -- be just "better" than the conservative case
          cpp.pending_c_function_body.append(once ")se_calloc(*n, sizeof(T")
+--         cpp.pending_c_function_body.append(once ")GC_MALLOC_ATOMIC(*n, sizeof(T")
          if et.is_reference then
             cpp.pending_c_function_body.append(once "0*));%N")
          else
@@ -347,41 +351,45 @@ feature {}
          wa: ARRAY[RUN_FEATURE_2]; i: INTEGER; a: RUN_FEATURE_2; t: TYPE
          has_capacity: BOOLEAN
       do
-         cpp.prepare_c_function
-         cpp.pending_c_function_signature.append(once "void*bdw_na_assignT")
-         live_type.id.append_in(cpp.pending_c_function_signature)
-         cpp.pending_c_function_signature.append(once "(T")
-         live_type.id.append_in(cpp.pending_c_function_signature)
-         cpp.pending_c_function_signature.append(once "*o)")
-         cpp.pending_c_function_body.append(once "if(bdw_na_assign_innerT")
-         live_type.id.append_in(cpp.pending_c_function_body)
-         cpp.pending_c_function_body.append(once "(o)==NULL&&GC_should_invoke_finalizers())bdw_run_finalizers();%N")
-         cpp.dump_pending_c_function(True)
+--         cpp.prepare_c_function
+--         cpp.pending_c_function_signature.append(once "void*bdw_na_assignT")
+--         live_type.id.append_in(cpp.pending_c_function_signature)
+--         cpp.pending_c_function_signature.append(once "(T")
+--         live_type.id.append_in(cpp.pending_c_function_signature)
+--         cpp.pending_c_function_signature.append(once "*o)")
+--         cpp.pending_c_function_body.append(once "if(bdw_na_assign_innerT")
+--         live_type.id.append_in(cpp.pending_c_function_body)
+--         cpp.pending_c_function_body.append(once "(o)==NULL&&GC_should_invoke_finalizers())bdw_run_finalizers();%N")
+--         cpp.dump_pending_c_function(True)
 
-         cpp.prepare_c_function
-         cpp.pending_c_function_signature.append(once "void*bdw_na_assign_innerT")
-         live_type.id.append_in(cpp.pending_c_function_signature)
-         cpp.pending_c_function_signature.append(once "(T")
-         live_type.id.append_in(cpp.pending_c_function_signature)
-         cpp.pending_c_function_signature.append(once "*o)")
-         cpp.pending_c_function_body.append(once "if(o->bdw_markna==NULL){%N%
-                                                 %T0**markna;%N%
-                                                 %GC_disable();%N%
-                                                 %bdw_in_assign=1;%N%
-                                                 %markna=se_malloc(sizeof(T0*));%N%
-                                                 %GC_REGISTER_FINALIZER_NO_ORDER(markna,(GC_finalization_proc)bdw_na_markT")
-         live_type.id.append_in(cpp.pending_c_function_body)
-         cpp.pending_c_function_body.append(once ",NULL,NULL,NULL);%N%
-                                                 %o->bdw_markna=(void*)HIDE_POINTER(markna);%N%
-                                                 %*markna=(T0*)o;%N%
-                                                 %GC_GENERAL_REGISTER_DISAPPEARING_LINK(&(o->bdw_markna),markna);%N%
-                                                 %bdw_in_assign=0;%N%
-                                                 %GC_enable();%N%
-                                                 %if(bdw_delayed_finalize){%N%
-                                                 %bdw_delayed_finalize=0;%N%
-                                                 %return NULL;}}%N%
-                                                 %return o;%N")
-         cpp.dump_pending_c_function(True)
+--         cpp.prepare_c_function
+--         cpp.pending_c_function_signature.append(once "void*bdw_na_assign_innerT")
+--         live_type.id.append_in(cpp.pending_c_function_signature)
+--         cpp.pending_c_function_signature.append(once "(T")
+--         live_type.id.append_in(cpp.pending_c_function_signature)
+--         cpp.pending_c_function_signature.append(once "*o)")
+         -- Rmk: this is crazy: we create an weak-referenced object 
+         -- in the native array to register a finalizer on it
+         -- to resurrect all alive elements
+         
+--         cpp.pending_c_function_body.append(once "if(o->bdw_markna==NULL){%N%
+--                                                 %T0**markna;%N%
+--                                                 %GC_disable();%N%
+--                                                 %bdw_in_assign=1;%N%
+--                                                 %markna=se_malloc(sizeof(T0*));%N%
+--                                                 %GC_REGISTER_FINALIZER_NO_ORDER(markna,(GC_finalization_proc)bdw_na_markT")
+--         live_type.id.append_in(cpp.pending_c_function_body)
+--         cpp.pending_c_function_body.append(once ",NULL,NULL,NULL);%N%
+--                                                 %o->bdw_markna=(void*)HIDE_POINTER(markna);%N%
+--                                                 %*markna=(T0*)o;%N%
+--                                                 %GC_GENERAL_REGISTER_DISAPPEARING_LINK(&(o->bdw_markna),markna);%N%
+--                                                 %bdw_in_assign=0;%N%
+--                                                 %GC_enable();%N%
+--                                               %if(bdw_delayed_finalize){%N%
+--                                               %bdw_delayed_finalize=0;%N%
+--                                               %return NULL;}}%N%
+--                                               %return o;%N")
+--       cpp.dump_pending_c_function(True)
 
          cpp.prepare_c_function
          cpp.pending_c_function_signature.append(once "void bdw_na_markT")
@@ -405,6 +413,8 @@ feature {}
                if t.is_native_array and then t.generic_list.first.is_reference then
                   if not has_capacity then
                      if live_type.type.has_simple_feature_name(capacity_name) then
+                        -- TODO: remove all capacity usages...
+                        
 -- Rmk, 2015-01-22: I don't understand this, so let's temporarily 
 -- disable it. At least it seems to make eiffeldoc a bit more stable 
 -- with BDW GC...
@@ -447,9 +457,10 @@ feature {}
                cpp.pending_c_function_body.append(once "o);%N")
             end
          end
-         cpp.pending_c_function_body.append(once "bdw_na_assignT")
-         live_type.id.append_in(cpp.pending_c_function_body)
-         cpp.pending_c_function_body.append(once "(o);%N%
+--       cpp.pending_c_function_body.append(once "bdw_na_assignT")
+--       live_type.id.append_in(cpp.pending_c_function_body)
+--       cpp.pending_c_function_body.append(once "(o);%N%
+       cpp.pending_c_function_body.append(once "%N%
                                                  %GC_enable();%N")
          cpp.dump_pending_c_function(True)
       end

@@ -72,15 +72,15 @@ feature {RESULT}
 feature {WRITABLE_ATTRIBUTE_NAME}
    visit_writable_attribute_name (visited: WRITABLE_ATTRIBUTE_NAME)
       do
-         cpp.pending_c_function_body.append(once "GC_call_with_alloc_lock((GC_fn_type)bdw_na_assignT")
-         type.id.append_in(cpp.pending_c_function_body)
-         cpp.pending_c_function_body.extend(',')
+--         cpp.pending_c_function_body.append(once "GC_call_with_alloc_lock((GC_fn_type)bdw_na_assignT")
+--         type.id.append_in(cpp.pending_c_function_body)
+--         cpp.pending_c_function_body.extend(',')
          --cpp.put_target_as_value
-         if type.is_expanded then
-            cpp.pending_c_function_body.extend('&')
-         end
-         cpp.pending_c_function_body.extend('C')
-         cpp.pending_c_function_body.append(once ");%N")
+--         if type.is_expanded then
+--            cpp.pending_c_function_body.extend('&')
+--         end
+--         cpp.pending_c_function_body.extend('C')
+--         cpp.pending_c_function_body.append(once ");%N")
       end
 
 feature {}
