@@ -37,6 +37,9 @@ feature {BDW_GC}
          cpp.pending_c_function_body.append(once "GC_invoke_finalizers();%N%
                                                  %handle(SE_HANDLE_EXIT_GC,NULL);}%N")
          cpp.dump_pending_c_function(True)
+
+         rmk add function here to bdw_init_kinds
+         
       end
 
 feature {ANY_TYPE_MARK}
@@ -277,10 +280,14 @@ feature {}
          cpp.pending_c_function_body.append(once " R=(")
          cpp.pending_c_function_body.append(cpp.target_type.for(tm))
          -- Rmk: GC_MALOC_ATOMIC
-         -- probably not atomic... as specific mark functions should 
-         -- be just "better" than the conservative case
-         cpp.pending_c_function_body.append(once ")se_calloc(*n, sizeof(T")
+         -- alloc native arrays as ordinary memory, better (less) 
+         -- marking shoud be reach by a specific mark-procedure
+         
 --         cpp.pending_c_function_body.append(once ")GC_MALLOC_ATOMIC(*n, sizeof(T")
+         -- Rmk: Todo: GC_MALLOC_ATOMIC should be used in case the 
+         -- native_array elements don't contain any references
+         cpp.pending_c_function_body.append(once ")se_calloc(*n, sizeof(T")
+
          if et.is_reference then
             cpp.pending_c_function_body.append(once "0*));%N")
          else
@@ -289,6 +296,7 @@ feature {}
             cpp.pending_c_function_body.append(et.live_type.structure_signature)
             cpp.pending_c_function_body.append(once "*/));%N")
          end
+         cpp.pending_c_function_body.append(once " /* native_array */")
          cpp.pending_c_function_body.append(once "return R;%N")
          cpp.dump_pending_c_function(True)
 
@@ -351,6 +359,34 @@ feature {}
          wa: ARRAY[RUN_FEATURE_2]; i: INTEGER; a: RUN_FEATURE_2; t: TYPE
          has_capacity: BOOLEAN
       do
+
+         todo: store necessary data to create the new "kind" for this NA type in bdw_init_kinds
+         
+
+         cpp.prepare_c_function
+         cpp.pending_c_function_signature.append(once "void*bdw_markna_T")
+         live_type.id.append_in(cpp.pending_c_function_signature)
+         cpp.pending_c_function_signature.append(once "(T")
+         live_type.id.append_in(cpp.pending_c_function_signature)
+         cpp.pending_c_function_signature.append(once "*o)")
+         cpp.pending_c_function_body.append(once "printf(%"bdw_markna_T")
+         live_type.id.append_in(cpp.pending_c_function_body)
+
+         cpp.pending_c_function_body.extend('r')
+         live_type.id.append_in(cpp.pending_c_function_body)
+         cpp.pending_c_function_body.append(once "mark_native_arrays(")
+         if not ace.boost then
+            -- Hope there is no bug in `mark_native_arrays'...
+            cpp.pending_c_function_body.append(once "NULL,")
+         end
+         if ace.profile then
+            cpp.pending_c_function_body.append(once "NULL,")
+         end
+         cpp.pending_c_function_body.append(once "o);%N")
+         
+         cpp.pending_c_function_body.append(once "%");")
+         cpp.dump_pending_c_function(True)
+
 --         cpp.prepare_c_function
 --         cpp.pending_c_function_signature.append(once "void*bdw_na_assignT")
 --         live_type.id.append_in(cpp.pending_c_function_signature)
@@ -391,6 +427,7 @@ feature {}
 --                                               %return o;%N")
 --       cpp.dump_pending_c_function(True)
 
+         -- Rmk: TODO: I think we should completely remove this one here...
          cpp.prepare_c_function
          cpp.pending_c_function_signature.append(once "void bdw_na_markT")
          live_type.id.append_in(cpp.pending_c_function_signature)

@@ -104,7 +104,8 @@ feature {C_PRETTY_PRINTER} -- C code phases
                                                  %GC_finalize_on_demand=1;%N%
                                                  %GC_finalizer_notifier=bdw_run_finalizers;%N%
                                                  %GC_INIT();%N%
-                                                 %GC_stackbottom=(char*)(void*)&argc;%N")
+                                                 %GC_stackbottom=(char*)(void*)&argc;%N%
+                                                 %bdw_init_kinds();%N")
       end
 
    initialize_thread
@@ -118,6 +119,11 @@ feature {C_PRETTY_PRINTER} -- C code phases
 
    gc_info_before_exit
       do
+         -- Rmk, 2015-04-25: as there is only one level of finalizers 
+         -- called each collection step, we might want to call 
+         -- GC_gcollect more often on exit. - Until no finalizer is 
+         -- to be called afterwards?
+         -- => the same in se_atexit ??
          cpp.pending_c_function_body.append(once "GC_enable();%N%
                                                  %eiffel_root_object=NULL;%N%
                                                  %GC_gcollect();%N%
@@ -277,12 +283,14 @@ feature {C_NATIVE_PROCEDURE_MAPPER}
          cpp.pending_c_function_body.append(once "/*mark_item*/")
          elt_type := rf7.arguments.name(1).resolve_in(rf7.type_of_current).generic_list.first
          if elt_type.is_reference then
+-- Rmk: we should mark the element
 --            cpp.pending_c_function_body.append(once "GC_MARK_AND_PUSH(")
 --            cpp.put_ith_argument(1)
 --            cpp.pending_c_function_body.append(once "[")
 --            cpp.put_ith_argument(2)
 --            cpp.pending_c_function_body.append(once "]);")
-            
+
+-- Rmk: this was old            
 --            cpp.pending_c_function_body.append(once "if(")
 --            cpp.put_ith_argument(1) -- (/*RF2:storage*/(C)->_storage/*Tniiiii*//*:RF2*/)
 --            cpp.pending_c_function_body.append(once "[")
@@ -327,6 +335,7 @@ feature {C_COMPILATION_MIXIN}
       local
          flag: TAGGED_FLAG
       do
+-- Rmk: check: do we need this?
          flag := native_array_collector.must_collect(type_mark.type.live_type)
          if flag /= Void and then flag.item then
             cpp.out_h_buffer.append(once "void*bdw_markna;")
