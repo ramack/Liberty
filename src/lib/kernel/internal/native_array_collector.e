@@ -27,18 +27,19 @@ insert
       end
 
 feature{}
-   mark_native_arrays
+   mark_native_arrays (context: POINTER)
          -- This routine is magically called by the garbage collector. This routine is supposed to mark
          -- only reachable slots for all attributes of type NATIVE_ARRAY by using the `mark_item'
-         -- built_in.
+         -- built_in and pass the context pointer to it.
       deferred
       end
 
-   mark_item (native_array: NATIVE_ARRAY[E_]; index: INTEGER)
+   mark_item (native_array: NATIVE_ARRAY[E_]; index: INTEGER; context: POINTER)
          -- To be used _only_ inside the definition of `mark_native_arrays'.
          -- Forces the garbage collector to continue the marking process on the `index'-th element of
          -- the `native_array'. The element at `index' can be Void or not Void (the Void-ness test
-         -- performed inside the `mark_item' itself).
+         -- performed inside the `mark_item' itself). `context' is to be passed from the
+         -- `mark_native_array' argument.
       external "built_in"
       end
 

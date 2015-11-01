@@ -812,7 +812,7 @@ feature {RING_ARRAY}
       end
 
 feature {} -- Garbage collector tuning (very low-level):
-   mark_native_arrays
+   mark_native_arrays (context: POINTER)
          -- For performance reasons, the unused area of `storage' is always left as it is when
          -- some elements are removed. No time is lost to clean the released area with a Void
          -- or a 0 value. (Look for example the `remove_last' implementation.)
@@ -829,7 +829,7 @@ feature {} -- Garbage collector tuning (very low-level):
                until
                   i < storage_lower
                loop
-                  mark_item(storage, i)
+                  mark_item(storage, i, context)
                   i := i - 1
                end
                from
@@ -837,7 +837,7 @@ feature {} -- Garbage collector tuning (very low-level):
                until
                   i < 0
                loop
-                  mark_item(storage, i)
+                  mark_item(storage, i, context)
                   i := i - 1
                end
             else
@@ -846,7 +846,7 @@ feature {} -- Garbage collector tuning (very low-level):
                until
                   i < storage_lower
                loop
-                  mark_item(storage, i)
+                  mark_item(storage, i, context)
                   i := i - 1
                end
             end

@@ -77,7 +77,7 @@ feature {ANY}
       end
 
 feature {}
-   mark_native_arrays
+   mark_native_arrays (context: POINTER)
       do
          clear_count
       end
