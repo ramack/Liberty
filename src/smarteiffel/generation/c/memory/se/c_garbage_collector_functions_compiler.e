@@ -665,7 +665,7 @@ feature {}
                if ace.profile then
                   function_body.append(once "NULL,")
                end
-               function_body.append(once "o);%N}%N}%N}")
+               function_body.append(once "o, NULL);%N}%N}%N}")
             else
                memory.mark_for(field_name, attribute_type, False)
             end
