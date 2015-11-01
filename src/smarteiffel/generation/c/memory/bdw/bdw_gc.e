@@ -39,10 +39,12 @@ feature {C_PRETTY_PRINTER} -- C code phases
          cpp.out_h_buffer.copy(once "#define BDW_GC 1%N%
                                     %#define GC_I_HIDE_POINTERS 1%N%
                                     %#include <gc/gc.h>%N%
+                                    %#include <gc/gc_mark.h>%N%
                                     %#define malloc(s) GC_MALLOC(s)%N%
                                     %#define calloc(n,s) GC_MALLOC_IGNORE_OFF_PAGE((s)*(n))%N%
                                     %#define realloc(p,s) GC_REALLOC((p),(s))%N%
-                                    %#define free(p) p=NULL%N")
+                                    %#define free(p) p=NULL%N%
+                                    %typedef struct { struct GC_ms_entry *mark_stack_ptr; struct GC_ms_entry *mark_stack_limit; GC_word env;} bdw_mark_data_T;%N")
          cpp.write_out_h_buffer
       end
 
@@ -119,7 +121,7 @@ feature {C_PRETTY_PRINTER} -- C code phases
 
    gc_info_before_exit
       do
-         -- Rmk, 2015-04-25: as there is only one level of finalizers 
+         -- Rmk, 2015-04-25: TODO: as there is only one level of finalizers 
          -- called each collection step, we might want to call 
          -- GC_gcollect more often on exit. - Until no finalizer is 
          -- to be called afterwards?
@@ -280,35 +282,26 @@ feature {C_NATIVE_PROCEDURE_MAPPER}
          elt_type: TYPE
       do
 
-         cpp.pending_c_function_body.append(once "/*mark_item*/")
+         cpp.pending_c_function_body.append(once "%N/*mark_item*/")
          elt_type := rf7.arguments.name(1).resolve_in(rf7.type_of_current).generic_list.first
          if elt_type.is_reference then
--- Rmk: we should mark the element
---            cpp.pending_c_function_body.append(once "GC_MARK_AND_PUSH(")
---            cpp.put_ith_argument(1)
---            cpp.pending_c_function_body.append(once "[")
---            cpp.put_ith_argument(2)
---            cpp.pending_c_function_body.append(once "]);")
+            cpp.pending_c_function_body.append(once "bdw_mark_data_T *c1 = (bdw_mark_data_T*)")
+            cpp.put_ith_argument(3)
+            cpp.pending_c_function_body.append(once ";%N")
+            cpp.pending_c_function_body.append(once "c1->mark_stack_ptr = GC_mark_and_push(")
+            cpp.put_ith_argument(1)
+            cpp.pending_c_function_body.append(once "[")
+            cpp.put_ith_argument(2)
+            cpp.pending_c_function_body.append(once "],c1->mark_stack_ptr, c1->mark_stack_limit, (void*)NULL);%N")
 
--- Rmk: this was old            
---            cpp.pending_c_function_body.append(once "if(")
---            cpp.put_ith_argument(1) -- (/*RF2:storage*/(C)->_storage/*Tniiiii*//*:RF2*/)
---            cpp.pending_c_function_body.append(once "[")
---            cpp.put_ith_argument(2) -- _i
---            cpp.pending_c_function_body.append(once "]!=NULL)")
---            cpp.put_ith_argument(1) -- (/*RF2:storage*/(C)->_storage/*Tniiiii*//*:RF2*/)
---            cpp.pending_c_function_body.append(once "[")
---            cpp.put_ith_argument(2) -- _i
---            cpp.pending_c_function_body.append(once "]=(")
---            cpp.pending_c_function_body.append(cpp.argument_type.for(elt_type.canonical_type_mark))
---            cpp.pending_c_function_body.append(once ")REVEAL_POINTER(")
---            cpp.put_ith_argument(1) -- (/*RF2:storage*/(C)->_storage/*Tniiiii*//*:RF2*/)
---            cpp.pending_c_function_body.append(once "[")
---            cpp.put_ith_argument(2) -- _i
---            cpp.pending_c_function_body.append(once "]);%N")
-            end
-            -- Rmk: todo: check: what if we have a 
-            -- NATIVE_ARRAY[expanded_type_containing_references]
+            -- TODO: See comment in gc_mark.h for type GC_mark_proc: 
+            -- The mark procedure is assumed to scan about GC_PROC_BYTES on 
+            -- average and should devide its work in case of bigger 
+            -- objects and push itself on the mark stack.
+         else
+            -- Rmk: TODO: mark referenced in expanded objects, stored 
+            -- in a NATIVE_ARRAY[expanded_type_containing_references]
+         end
       end
 
 feature {C_PRETTY_PRINTER}
@@ -332,24 +325,13 @@ feature {C_COMPILATION_MIXIN}
       end
 
    extra_c_struct (type_mark: TYPE_MARK)
-      local
-         flag: TAGGED_FLAG
       do
--- Rmk: check: do we need this?
-         flag := native_array_collector.must_collect(type_mark.type.live_type)
-         if flag /= Void and then flag.item then
-            cpp.out_h_buffer.append(once "void*bdw_markna;")
-         end
+         -- empty for BDW
       end
 
    extra_c_model (type_mark: TYPE_MARK)
-      local
-         flag: TAGGED_FLAG
       do
-         flag := native_array_collector.must_collect(type_mark.type.live_type)
-         if flag /= Void and then flag.item then
-            cpp.out_c_buffer.append(once "(void*)0,")
-         end
+         -- empty for BDW
       end
 
    assigned_native_array (assignment: ASSIGNMENT; type: TYPE)
