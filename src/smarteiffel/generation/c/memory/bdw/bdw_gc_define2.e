@@ -27,7 +27,7 @@ feature {BDW_GC}
    extra_functions
       local
          nat_idx: INTEGER
-         gc_kind_var: STRING
+--         gc_kind_var: STRING
       do
          cpp.prepare_c_function
          cpp.pending_c_function_signature.append(once "void bdw_run_finalizers(void)")
@@ -42,46 +42,67 @@ feature {BDW_GC}
          cpp.dump_pending_c_function(True)
 
          -- generate global kind variables
-         create gc_kind_var.make(32)
+--         create gc_kind_var.make(32)
 
-         from
-            nat_idx := native_arraytypes.lower
-         until
-            nat_idx > native_arraytypes.upper
-         loop
-            gc_kind_var.wipe_out
-            gc_kind_var.append(once "unsigned int T")
-            native_arraytypes.item(nat_idx).id.append_in(gc_kind_var)
-            gc_kind_var.append("_gc_kind");
-            cpp.write_extern_1(gc_kind_var)
-            nat_idx := nat_idx + 1
-         end
- 
+--         from
+--            nat_idx := native_arraytypes.lower
+--         until
+--            nat_idx > native_arraytypes.upper
+--         loop
+--            gc_kind_var.wipe_out
+--            gc_kind_var.append(once "unsigned int T")
+--            native_arraytypes.item(nat_idx).id.append_in(gc_kind_var)
+--            gc_kind_var.append("_gc_kind")
+--            cpp.write_extern_1(gc_kind_var)
+--            nat_idx := nat_idx + 1
+--         end
+
+         cpp.write_extern_1("unsigned int bdw_nac_gc_kind")
          cpp.pending_c_function_signature.append(once "void bdw_init_kinds(void)")
          cpp.pending_c_function_body.append(once "%N")
-
-         from
-            nat_idx := native_arraytypes.lower
-         until
-            nat_idx > native_arraytypes.upper
-         loop
-            cpp.pending_c_function_body.append(once "T")
-            native_arraytypes.item(nat_idx).id.append_in(cpp.pending_c_function_body)
-            cpp.pending_c_function_body.append(once "_gc_kind = GC_new_kind (GC_new_free_list (), GC_MAKE_PROC (GC_new_proc ((GC_mark_proc)T")
-            native_arraytypes.item(nat_idx).id.append_in(cpp.pending_c_function_body)
-            cpp.pending_c_function_body.append(once "_mark), 0), 0, 1);%N")
-            nat_idx := nat_idx + 1
-         end
+-- TODO: add special handling for non-boost prototype with additional parameter
+         
+-- TODO: Rmk: this doesn work, as the number of kinds is very limited 
+-- -> create only ONE kind for all NATIVE_ARRAYs
+--         from
+--            nat_idx := native_arraytypes.lower
+--         until
+--            nat_idx > native_arraytypes.upper
+--         loop
+--            cpp.pending_c_function_body.append(once "T")
+--            native_arraytypes.item(nat_idx).id.append_in(cpp.pending_c_function_body)
+            cpp.pending_c_function_body.append(once "bdw_nac_gc_kind = GC_new_kind (GC_new_free_list (), GC_MAKE_PROC (GC_new_proc ((GC_mark_proc)bdw_mark_na_collector")
+--            native_arraytypes.item(nat_idx).id.append_in(cpp.pending_c_function_body)
+            cpp.pending_c_function_body.append(once "), 0), 0, 1);%N")
+--            nat_idx := nat_idx + 1
+--         end
 
          cpp.dump_pending_c_function(True)
 
+         cpp.pending_c_function_signature.append(once "struct GC_ms_entry *bdw_mark_na_collector(void *obj, struct GC_ms_entry *mark_stack_ptr, struct GC_ms_entry *mark_stack_limit, GC_word env)")
+         cpp.pending_c_function_body.append(once "%N")
+         cpp.pending_c_function_body.append(once "T0 *C = (T0*)obj;%N")
+         
+         cpp.pending_c_function_body.append(once "switch(C->id){%N")
+
          from
             nat_idx := native_arraytypes.lower
          until
             nat_idx > native_arraytypes.upper
          loop
+            cpp.pending_c_function_body.append(once "case ")
+            native_arraytypes.item(nat_idx).id.append_in(cpp.pending_c_function_body)
+            cpp.pending_c_function_body.append(once ":%N  T")
+            native_arraytypes.item(nat_idx).id.append_in(cpp.pending_c_function_body)
+            cpp.pending_c_function_body.append(once "_mark((T")
+            native_arraytypes.item(nat_idx).id.append_in(cpp.pending_c_function_body)
+            cpp.pending_c_function_body.append(once "*)C, mark_stack_ptr, mark_stack_limit, env);%N  break;%N")
             nat_idx := nat_idx + 1
          end
+         cpp.pending_c_function_body.append(once "default:%N  printf(%"mmmooooehp %%d\n%", C->id);%N  break;%N}%N")
+--TODO: check whether this function should return mark_stack_ptr and whether C has to be marked here (I guess not)
+         cpp.dump_pending_c_function(True)
+
       end
 
 feature {ANY_TYPE_MARK}
@@ -266,6 +287,7 @@ feature {}
          has_finalizer: BOOLEAN
       do
          has_finalizer := finalize_reference(tm)
+io.put_string("alloc_reference : " + tm.written_mark + "%N")
 
          prepare_alloc_inner_function(tm)
          cpp.pending_c_function_body.append(cpp.target_type.for(tm))
@@ -276,13 +298,14 @@ feature {}
             cpp.pending_c_function_body.append(once ")GC_generic_malloc ((*n)*sizeof (T")
             live_type.id.append_in(cpp.pending_c_function_body)
             
-            cpp.pending_c_function_body.append(once "), T")
-            live_type.type.id.append_in(cpp.pending_c_function_body)
-            cpp.pending_c_function_body.append(once "_gc_kind);%N")
+            cpp.pending_c_function_body.append(once "), ")
+--            live_type.type.id.append_in(cpp.pending_c_function_body)
+            cpp.pending_c_function_body.append(once "bdw_nac_gc_kind);%N")
 
+            io.put_string("  NATIVE_ARRAY_COLLECTORs in NATIVE_ARRAY%N")
             if ace.boost then
-               cpp.pending_c_function_body.append(once "/*Allocation of NATIVE_ARRAY_COLLECTORs in NATIVE_ARRAYs is currently not supported.")
-               cpp.pending_c_function_body.append(once "*/%Nse_signal_handler(14/*System_level_type_error*/);%N")
+               cpp.pending_c_function_body.append(once "/* Allocation of NATIVE_ARRAY_COLLECTORs in NATIVE_ARRAYs is currently not supported.")
+               cpp.pending_c_function_body.append(once "*/%Nif(*n != 1) se_signal_handler(14/*System_level_type_error*/);%N")
             else
                cpp.pending_c_function_body.append(once "if(*n != 1) error0(%"%
                    %Allocation of NATIVE_ARRAY_COLLECTORs in NATIVE_ARRAYs is currently not supported.%", NULL);%N")
@@ -302,6 +325,8 @@ feature {}
             live_type.id.append_in(cpp.pending_c_function_body)
             cpp.pending_c_function_body.append(once ",NULL,NULL,NULL);%N")
          end
+         -- TODO: check whether we really need to set id here, at 
+         -- least for STRINGs is it updated in some other places, too
          if cpp.need_struct.for(tm) then
             cpp.pending_c_function_body.append(once "*R=M")
             live_type.id.append_in(cpp.pending_c_function_body)
@@ -318,6 +343,7 @@ feature {}
          live_type.is_reference
          tm = live_type.canonical_type_mark
       do
+io.put_string("alloc_weak_reference : " + tm.written_mark + "%N")
          prepare_weakref_accessors
 
          prepare_alloc_inner_function(tm)
@@ -342,6 +368,7 @@ feature {}
          et: TYPE
       do
          et := live_type.type.generic_list.first
+io.put_string("alloc_native_array : " + tm.written_mark + "%N")
          
          prepare_alloc_inner_function(tm)
          cpp.pending_c_function_body.append(cpp.target_type.for(tm))
@@ -412,6 +439,7 @@ feature {}
          cpp.write_out_h_buffer
          cpp.prepare_c_function
          cpp.pending_c_function_signature.append(once "void bdw_weakref_setlink(bdw_Twr*wr,T0*r)")
+--         TODO: disappearing_links are to be un-registered and registered again, in case of realloc...
          cpp.pending_c_function_body.append(once "GC_disable();%N%
                                                  %if(wr->o)GC_unregister_disappearing_link((void**)&(wr->o));%N%
                                                  %wr->o=r;%N%
@@ -426,6 +454,7 @@ feature {}
 
          cpp.prepare_c_function
          cpp.pending_c_function_signature.append(once "void*bdw_weakref_new(int n)")
+--TODO:        Rmk: is it correct to use GC_MALLOC_ATOMIC here?
          cpp.pending_c_function_body.append(once "void*result=GC_MALLOC_ATOMIC(n*sizeof(bdw_Twr));%N%
                                                  %se_check_malloc(result, %"No more memory (GC_MALLOC_ATOMIC failed).\n%");%N%
                                                  %return result;%N")
@@ -442,6 +471,7 @@ feature {}
          -- TODO: add header comment
          -- store necessary data to create the new "kind" for this NA type in bdw_init_kinds
          native_arraytypes.add_last(live_type)
+io.put_string("mark_native_arrays : " + type_mark.written_mark + "%N")
 
          create fct_name.with_capacity(256)
          fct_name.append(once "struct GC_ms_entry *T")
@@ -456,6 +486,8 @@ feature {}
 
 --     TODO: /* It is likely that the GC passed us a pointer to a free-list element
 --       which we must ignore (see warning in `gc/gc_mark.h').  */
+--       this is especially harmful in case we use the Tid to 
+--       identify the type/kind
 
          -- mark the references in this object
          wa := live_type.writable_attributes
