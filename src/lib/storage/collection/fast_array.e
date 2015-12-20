@@ -24,7 +24,7 @@ inherit
       end
    ARRAYED_COLLECTION[E_]
       redefine default_create
-          end
+      end
 
 insert
    NATIVE_ARRAY_COLLECTOR[E_]
@@ -208,7 +208,7 @@ feature {ANY} -- Implementation of deferred:
 
    set_all_with (v: like item)
       do
-         storage.set_all_with(v, upper)
+         storage.set_all_with(v, upper) -- TODO: no next_generation here?
       end
 
    from_collection (model: TRAVERSABLE[like item])
@@ -386,7 +386,7 @@ feature {} -- Garbage collector tuning (very low-level):
          i: INTEGER
       do
          from
-            i := upper
+            i := upper -- upper is negative in case count = 0, that's why we count down
          until
             i < 0
          loop
