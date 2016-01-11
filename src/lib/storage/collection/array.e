@@ -16,16 +16,26 @@ class ARRAY[E_]
 
 inherit
    COLLECTION[E_]
-      undefine default_create
+      redefine default_create
       end
    ARRAYED_COLLECTION[E_]
+      redefine default_create
+      end
+
 insert
    NATIVE_ARRAY_COLLECTOR[E_]
       undefine default_create, out_in_tagged_out_memory
+      redefine default_create
       end
 
 create {ANY}
    default_create, make, with_capacity, from_collection, manifest_creation
+
+feature {}
+   default_create
+      do
+         make(0, -1)
+      end
 
 feature {ANY}
    lower: INTEGER
@@ -403,11 +413,19 @@ feature {ANY} -- Implementation of deferred:
       end
 
    slice (min, max: INTEGER): like Current
+      local
+         null: POINTER
       do
-         create Result.make(lower, lower + max - min)
+         Result := standard_twin
+         Result.set_upper(Result.lower - 1)
+         Result.from_external(null, 0)
+
          if max >= min then
             -- Slice not empty
+            Result.make(lower, lower + max - min)
             Result.storage.slice_copy(0, storage, min - lower, max - lower)
+         else
+            Result.with_capacity(0, lower)
          end
       end
 
@@ -456,7 +474,7 @@ feature {} -- Implement manifest generic creation (very low-level):
 
 end -- class ARRAY
 --
--- Copyright (c) 2009-2015 by all the people cited in the AUTHORS file.
+-- Copyright (C) 2009-2016: by all the people cited in the AUTHORS file.
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal

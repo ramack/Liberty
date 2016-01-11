@@ -162,10 +162,12 @@ feature {JSON_HANDLER}
       do
          str := a_string.intern
          Result := json_strings.fast_reference_at(str)
-         if Result = Void then
+         if Result = Void or else not Result.is_valid then
             create Result.from_string(str)
-            json_strings.add(Result, str)
+            json_strings.put(Result, str)
          end
+      ensure
+         Result.is_valid
       end
 
 feature {}
@@ -181,7 +183,7 @@ feature {}
 
 end -- class JSON_STRINGS
 --
--- Copyright (c) 2009-2015 by all the people cited in the AUTHORS file.
+-- Copyright (C) 2009-2016: by all the people cited in the AUTHORS file.
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal

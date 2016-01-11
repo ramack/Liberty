@@ -161,13 +161,17 @@ feature {}
          if mock_file = Void then
             mock_file := compute_file_name(fz_mock)
          end
-         create mock_gen.make(mock_file)
-         mock_gen.generate(features_collector.features)
+         create mock_gen.make(class_text, mock_file)
 
          if expect_file = Void then
             expect_file := compute_file_name(fz_expect)
          end
-         create expect_gen.make(expect_file)
+         create expect_gen.make(class_text, expect_file)
+
+         mock_gen.sibling := expect_gen
+         expect_gen.sibling := mock_gen
+
+         mock_gen.generate(features_collector.features)
          expect_gen.generate(features_collector.features)
       end
 
@@ -183,6 +187,8 @@ feature {}
       end
 
    collect_features
+      require
+         type /= Void
       local
          i: INTEGER
       do
@@ -192,7 +198,7 @@ feature {}
          until
             i > parent_list.upper
          loop
-            features_collector.collect(parent_list.item(i))
+            features_collector.collect(parent_list.item(i), type)
             i := i + 1
          end
       end
@@ -252,7 +258,7 @@ end -- class MOCK
 -- received a copy of the GNU General Public License along with Liberty Eiffel; see the file COPYING. If not, write to the Free
 -- Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 --
--- Copyright(C) 2011-2015: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
+-- Copyright (C) 2011-2016: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
 --
 -- http://www.gnu.org/software/liberty-eiffel/
 --

@@ -8,8 +8,16 @@ inherit
 
 feature {ANY}
    out_in_tagged_out_memory
+      local
+         s: STRING
       do
-         tagged_out_memory.extend('?')
+         s := once ""
+         s.copy(generating_type)
+         s.remove_prefix(once "MOCK_ANY[")
+         s.remove_suffix(once "]")
+         tagged_out_memory.extend('{')
+         tagged_out_memory.append(s)
+         tagged_out_memory.extend('}')
       end
 
 feature {MOCK_EXPECTATION}
@@ -20,7 +28,7 @@ feature {MOCK_EXPECTATION}
 
 end -- class MOCK_ANY
 --
--- Copyright (c) 2013-2015 Cyril ADRIAN <cyril.adrian@gmail.com>
+-- Copyright (C) 2013-2016: Cyril ADRIAN <cyril.adrian@gmail.com>
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal

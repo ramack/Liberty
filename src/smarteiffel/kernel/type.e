@@ -370,7 +370,10 @@ feature {EFFECTIVE_ROUTINE}
                   effective_routine ?= af_current
                   -- Because the `default_rescue' itself can be deferred:
                   if effective_routine /= Void then
-                     default_rescue_compound := effective_routine.routine_body --| **** TODO: what about effective_routine.routine_then ???
+                     default_rescue_compound := effective_routine.routine_body
+                     check
+                        effective_routine.routine_then = Void
+                     end
                      af_current.collect(Current)
                   end
                end
@@ -1574,7 +1577,7 @@ end -- class TYPE
 -- received a copy of the GNU General Public License along with Liberty Eiffel; see the file COPYING. If not, write to the Free
 -- Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 --
--- Copyright(C) 2011-2015: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
+-- Copyright (C) 2011-2016: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
 --
 -- http://www.gnu.org/software/liberty-eiffel/
 --

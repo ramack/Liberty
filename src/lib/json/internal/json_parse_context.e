@@ -119,7 +119,7 @@ feature {}
                                                 if c.code >= 32 then
                                                    Result := once "'#(1)' (#(2), #(3))" # c.out # line.out # column.out
                                                 else
-                                                   Result := once "##(1) (#(2), #(3))" # c.code.out # line.out # column.out
+                                                   Result := once "###(1) (#(2), #(3))" # c.code.out # line.out # column.out
                                                 end
                                              else
                                                 Result := once "(invalid)"
@@ -156,7 +156,7 @@ invariant
 
 end -- class JSON_PARSE_CONTEXT
 --
--- Copyright (c) 2009-2015 by all the people cited in the AUTHORS file.
+-- Copyright (C) 2009-2016: by all the people cited in the AUTHORS file.
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal

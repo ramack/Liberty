@@ -291,7 +291,7 @@ feature {CODE, EFFECTIVE_ARG_LIST}
                       exceptions.System_level_type_error)
                inspect_statement.set_else_compound(feature_name.start_position, run_time_error_instruction)
             end
-         end
+      end
          from
             code_accumulator_index := code_accumulator_index + 1
          until
@@ -335,7 +335,7 @@ end -- class PROCEDURE_CALL
 -- received a copy of the GNU General Public License along with Liberty Eiffel; see the file COPYING. If not, write to the Free
 -- Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 --
--- Copyright(C) 2011-2015: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
+-- Copyright (C) 2011-2016: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
 --
 -- http://www.gnu.org/software/liberty-eiffel/
 --

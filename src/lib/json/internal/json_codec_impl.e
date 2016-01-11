@@ -55,6 +55,11 @@ feature {JSON_HANDLER}
          nested.add_to_array(array, value)
       end
 
+   finalize_array (array: JSON_DATA)
+      do
+         nested.finalize_array(array)
+      end
+
    create_object: JSON_DATA
       do
          Result := nested.create_object
@@ -63,6 +68,11 @@ feature {JSON_HANDLER}
    add_to_object (object, key, value: JSON_DATA)
       do
          nested.add_to_object(object, key, value)
+      end
+
+   finalize_object (object: JSON_DATA)
+      do
+         nested.finalize_object(object)
       end
 
    create_string (string: JSON_STRING): JSON_DATA
@@ -105,7 +115,7 @@ invariant
 
 end -- class JSON_CODEC_IMPL
 --
--- Copyright (c) 2009-2015 by all the people cited in the AUTHORS file.
+-- Copyright (C) 2009-2016: by all the people cited in the AUTHORS file.
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal

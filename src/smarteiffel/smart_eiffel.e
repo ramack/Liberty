@@ -294,7 +294,7 @@ feature {CLASS_CHECKER}
          end
       end
 
-feature {CLASS_CHECKER, EXTERNAL_TOOL}
+feature {COMMAND_LINE_TOOLS}
    set_short_or_class_check_flag
       do
          short_or_class_check_flag := True
@@ -2568,7 +2568,7 @@ end -- class SMART_EIFFEL
 -- received a copy of the GNU General Public License along with Liberty Eiffel; see the file COPYING. If not, write to the Free
 -- Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 --
--- Copyright(C) 2011-2015: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
+-- Copyright (C) 2011-2016: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
 --
 -- http://www.gnu.org/software/liberty-eiffel/
 --

@@ -32,16 +32,19 @@ feature {JSON_ARRAY}
          i: INTEGER
       do
          array := codec.create_array
-         from
-            i := json.array.lower
-         until
-            i > json.array.upper
-         loop
-            json.array.item(i).accept(Current)
-            value := data
+         if array /= Void then
+            from
+               i := json.array.lower
+            until
+               i > json.array.upper
+            loop
+               json.array.item(i).accept(Current)
+               value := data
 
-            codec.add_to_array(array, value)
-            i := i + 1
+               codec.add_to_array(array, value)
+               i := i + 1
+            end
+            codec.finalize_array(array)
          end
          data := array
       end
@@ -71,18 +74,21 @@ feature {JSON_OBJECT}
          i: INTEGER
       do
          object := codec.create_object
-         from
-            i := json.members.lower
-         until
-            i > json.members.upper
-         loop
-            json.members.key(i).accept(Current)
-            key := data
-            json.members.item(i).accept(Current)
-            value := data
+         if object /= Void then
+            from
+               i := json.members.lower
+            until
+               i > json.members.upper
+            loop
+               json.members.key(i).accept(Current)
+               key := data
+               json.members.item(i).accept(Current)
+               value := data
 
-            codec.add_to_object(object, key, value)
-            i := i + 1
+               codec.add_to_object(object, key, value)
+               i := i + 1
+            end
+            codec.finalize_object(object)
          end
          data := object
       end
@@ -109,7 +115,7 @@ feature {}
 
 end -- class JSON_DECODER
 --
--- Copyright (c) 2009-2015 by all the people cited in the AUTHORS file.
+-- Copyright (C) 2009-2016: by all the people cited in the AUTHORS file.
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal

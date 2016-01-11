@@ -1681,6 +1681,7 @@ feature {ANY}
       require
          smart_eiffel.is_ready
          arguments_count > 0
+         current_call_has_arguments: stack_top.effective_arguments /= Void
       local
          i: INTEGER
       do
@@ -1702,6 +1703,7 @@ feature {ANY}
       require
          smart_eiffel.is_ready
          index >= 1
+         current_call_has_arguments: stack_top.effective_arguments /= Void
       local
          code: INTEGER; fal: FORMAL_ARG_LIST; type: TYPE
       do
@@ -1731,8 +1733,8 @@ feature {C_EXPRESSION_COMPILATION_MIXIN}
    args_compile_to_c_ith (type: TYPE; args: EFFECTIVE_ARG_LIST; fal: FORMAL_ARG_LIST; index: INTEGER)
          -- Produce C code for expression `index'.
       require
-         args.count = fal.count
-         index.in_range(1, args.count)
+         args /= Void and then args.count = fal.count
+         args /= Void and then index.in_range(1, args.count)
       local
          e: EXPRESSION; boolean_cast_flag: BOOLEAN
       do
@@ -4188,15 +4190,6 @@ feature {} -- ONCE_ROUTINE_POOL
             code_compiler.compile(rf.routine_body, type)
          else
             pending_c_function_body.append(once "/*  - NO routine body*/%N")
-         end
-         if rf.routine_then /= Void then
-            pending_c_function_body.append(once "/*then*/")
-            once_routine_pool.unique_result_in(pending_c_function_body, rf.base_feature)
-            pending_c_function_body.extend('=')
-            code_compiler.compile(rf.routine_then, type)
-            pending_c_function_body.append(once ";%N")
-         else
-            pending_c_function_body.append(once "/*  - NO then*/%N")
          end
          --
          if rf.ensure_assertion /= Void then

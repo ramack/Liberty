@@ -65,7 +65,7 @@ feature {}
             elseif flag_match(fz_loadpath, arg) then
                if argi < argc then
                   system_tools.add_loadpath_file(argument(argi + 1))
-                  argi := argi + 2
+                  argi := argi + 1
                else
                   echo.w_put_string(command_line_name)
                   echo.w_put_string(once ": missing loadpath file path after -loadpath flag.%N")
@@ -141,7 +141,7 @@ end -- class FINDER
 -- received a copy of the GNU General Public License along with Liberty Eiffel; see the file COPYING. If not, write to the Free
 -- Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 --
--- Copyright(C) 2011-2015: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
+-- Copyright (C) 2011-2016: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
 --
 -- http://www.gnu.org/software/liberty-eiffel/
 --

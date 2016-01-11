@@ -34,6 +34,8 @@ feature {}
       end
 
    buckets_item (a_buckets: like buckets; idx: INTEGER): like cache_node
+      require
+         idx.in_range(0, capacity - 1)
       do
          Result := a_buckets.item(idx)
       end
@@ -501,6 +503,8 @@ feature {}
             from
                cache_user := index
                cache_node := cache_node.next
+            invariant
+               cache_buckets.in_range(0, capacity - 1)
             until
                cache_node /= Void
             loop
@@ -513,6 +517,8 @@ feature {}
                cache_user := 1
                cache_buckets := 0
                cache_node := buckets_item(buckets, cache_buckets)
+            invariant
+               cache_buckets.in_range(0, capacity - 1)
             until
                cache_node /= Void
             loop
@@ -638,7 +644,7 @@ invariant
 
 end -- class ABSTRACT_HASHED_DICTIONARY
 --
--- Copyright (c) 2009-2015 by all the people cited in the AUTHORS file.
+-- Copyright (C) 2009-2016: by all the people cited in the AUTHORS file.
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal

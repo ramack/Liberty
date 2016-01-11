@@ -34,13 +34,18 @@ feature {ANY}
       end
 
 feature {MOCK_EXPECTATION_GROUP}
-   replay (missing_expectations: COLLECTION[MOCK_EXPECTATION])
+   start_replay (missing_expectations: COLLECTION[MOCK_EXPECTATION])
       require
          missing_expectations /= Void
       do
-         target.replay(missing_expectations)
+         target.start_replay(missing_expectations)
       ensure
          target.missing_expectations = missing_expectations
+      end
+
+   stop_replay
+      do
+         target.stop_replay
       end
 
    done
@@ -72,7 +77,7 @@ invariant
 
 end -- class MOCK_EXPECTATION
 --
--- Copyright (c) 2013-2015 Cyril ADRIAN <cyril.adrian@gmail.com>
+-- Copyright (C) 2013-2016: Cyril ADRIAN <cyril.adrian@gmail.com>
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal

@@ -328,6 +328,8 @@ io.put_string("alloc_reference : " + tm.written_mark + "%N")
          -- TODO: check whether we really need to set id here, at 
          -- least for STRINGs is it updated in some other places, too
          if cpp.need_struct.for(tm) then
+-- TODO: check whether this is really necessary... it seems 
+-- duplicated in TEST_AC01
             cpp.pending_c_function_body.append(once "*R=M")
             live_type.id.append_in(cpp.pending_c_function_body)
             cpp.pending_c_function_body.append(once ";%N")
@@ -545,7 +547,7 @@ end -- class BDW_GC_DEFINE2
 -- received a copy of the GNU General Public License along with Liberty Eiffel; see the file COPYING. If not, write to the Free
 -- Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 --
--- Copyright(C) 2011-2015: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
+-- Copyright (C) 2011-2016: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
 --
 -- http://www.gnu.org/software/liberty-eiffel/
 --

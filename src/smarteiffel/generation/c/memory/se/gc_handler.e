@@ -79,6 +79,15 @@ feature {C_PRETTY_PRINTER}
             cpp.write_extern_0(once "void*gc_lock");
             cpp.pending_c_function_body.append(once "gc_lock=se_thread_lock_alloc();%N")
          end
+         if ace.boost then
+            -- In boost you just want the process to stop quickly. For correctness you should not rely on
+            -- dispose for useful computation anyway.
+            cpp.pending_c_function_body.append(once "gc_set_dispose_before_exit(0);%N")
+         else
+            -- In other modes you may want to run dispose at exit because the standard library contains checks
+            -- in its dispose functions.
+            cpp.pending_c_function_body.append(once "gc_set_dispose_before_exit(1);%N")
+         end
       end
 
    initialize_thread
@@ -968,7 +977,7 @@ end -- class GC_HANDLER
 -- received a copy of the GNU General Public License along with Liberty Eiffel; see the file COPYING. If not, write to the Free
 -- Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 --
--- Copyright(C) 2011-2015: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
+-- Copyright (C) 2011-2016: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
 --
 -- http://www.gnu.org/software/liberty-eiffel/
 --

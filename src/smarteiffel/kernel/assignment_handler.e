@@ -86,7 +86,7 @@ feature {SMART_EIFFEL}
          echo.put_string(once ".(done).%N")
       end
 
-feature {CALL_1, ASSIGNMENT, EFFECTIVE_ARG_LIST, MANIFEST_GENERIC, PROCEDURE_CALL_1, FAKE_TUPLE, E_FUNCTION}
+feature {FEATURE_CALL, ASSIGNMENT, EFFECTIVE_ARG_LIST, MANIFEST_GENERIC, FAKE_TUPLE, EFFECTIVE_ROUTINE}
    implicit_cast (expression: EXPRESSION; expression_type, destination_type: TYPE): EXPRESSION
          -- If necessary, wrap the source `expression' inside an IMPLICIT_CAST invisible wrapper object,
          -- hence the name of this function.
@@ -273,7 +273,7 @@ end -- class ASSIGNMENT_HANDLER
 -- received a copy of the GNU General Public License along with Liberty Eiffel; see the file COPYING. If not, write to the Free
 -- Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 --
--- Copyright(C) 2011-2015: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
+-- Copyright (C) 2011-2016: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
 --
 -- http://www.gnu.org/software/liberty-eiffel/
 --

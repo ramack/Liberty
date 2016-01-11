@@ -272,8 +272,17 @@ feature {ANY}
          has_anonymous_feature_for(target_type)
       do
          Result := anonymous_features.fast_reference_at(target_type)
+         if Result = Void then
+            error_handler.add_position(name.start_position)
+            error_handler.append(once "Cannot find the feature ")
+            error_handler.append(name.to_string)
+            error_handler.append(once " in type ")
+            error_handler.append(target_type.name.to_string)
+            error_handler.append(once ". Compiler lost!")
+            --error_handler.print_as_internal_error
+         end
       ensure
-         Result /= Void
+         Result = Void implies not error_handler.is_empty
       end
 
    resolve_static_binding_for (declaration_type, new_type: TYPE): FEATURE_STAMP
@@ -709,7 +718,7 @@ end -- class FEATURE_STAMP
 -- received a copy of the GNU General Public License along with Liberty Eiffel; see the file COPYING. If not, write to the Free
 -- Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 --
--- Copyright(C) 2011-2015: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
+-- Copyright (C) 2011-2016: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
 --
 -- http://www.gnu.org/software/liberty-eiffel/
 --

@@ -26,6 +26,12 @@ feature {ANY}
 
    out_in_tagged_out_memory
       do
+         if counter_ready then
+            tagged_out_memory.extend('(')
+            counter.out_in_tagged_out_memory
+            tagged_out_memory.extend(')')
+            tagged_out_memory.extend(' ')
+         end
          target.out_in_tagged_out_memory
          tagged_out_memory.extend('.')
          tagged_out_memory.append(feature_name)
@@ -96,6 +102,12 @@ feature {}
       require
          can_call(target, feature_name, a_arguments)
       do
+         debug
+            io.put_string(once " => Calling ")
+            io.put_string(out)
+            io.put_string(once " with arguments ")
+            io.put_line(a_arguments.out)
+         end
          do_call(a_arguments)
          counter.call
       end
@@ -112,7 +124,7 @@ feature {MOCK_EXPECTATION_GROUP}
    all_called
       do
          counter.all_called
-         target.replay(Void)
+         target.stop_replay
       end
 
    all_done_message_in (message: STRING)
@@ -152,12 +164,14 @@ feature {}
       end
 
 invariant
+   target /= Void
+   feature_name.is_interned
    arg_matchers /= Void
    ready implies counter_ready
 
 end -- class MOCK_TYPED_EXPECTATION
 --
--- Copyright (c) 2013-2015 Cyril ADRIAN <cyril.adrian@gmail.com>
+-- Copyright (C) 2013-2016: Cyril ADRIAN <cyril.adrian@gmail.com>
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal

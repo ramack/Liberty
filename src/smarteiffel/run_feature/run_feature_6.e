@@ -30,8 +30,6 @@ feature {ANY}
 
    routine_body: INSTRUCTION
 
-   routine_then: EXPRESSION
-
    rescue_compound: INSTRUCTION
 
    ensure_assertion: ENSURE_ASSERTION
@@ -78,9 +76,8 @@ feature {}
          if routine_body /= Void then
             routine_body := routine_body.adapt_for(type_of_current)
          end
-         routine_then := base_feature.routine_then
-         if routine_then /= Void then
-            routine_then := routine_then.adapt_for(type_of_current)
+         check
+            specialized: base_feature.routine_then = Void
          end
          -- Adapt the assertions:
          if class_text.require_check and then base_feature.require_assertion /= Void then
@@ -136,7 +133,7 @@ end -- class RUN_FEATURE_6
 -- received a copy of the GNU General Public License along with Liberty Eiffel; see the file COPYING. If not, write to the Free
 -- Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 --
--- Copyright(C) 2011-2015: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
+-- Copyright (C) 2011-2016: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
 --
 -- http://www.gnu.org/software/liberty-eiffel/
 --

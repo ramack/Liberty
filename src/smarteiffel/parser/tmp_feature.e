@@ -370,11 +370,12 @@ feature {EIFFEL_PARSER}
                error_handler.print_as_fatal_error
             end
             create Result.once_procedure(n, arguments, obsolete_mark, header_comment, require_assertion, local_vars, routine_body, assigned, index_list, has_closures)
-         elseif assigned /= Void then
-            error_handler.add_position(assigned.start_position)
-            error_handler.append(once "A function cannot be an assigner.")
-            error_handler.print_as_fatal_error
          else
+            if assigned /= Void then
+               error_handler.add_position(assigned.start_position)
+               error_handler.append(once "A function cannot be an assigner.")
+               error_handler.print_as_fatal_error
+            end
             create Result.once_function(n, arguments, type, obsolete_mark, header_comment, require_assertion, local_vars, routine_body, routine_then, index_list, has_closures)
          end
       end
@@ -388,11 +389,12 @@ feature {EIFFEL_PARSER}
                error_handler.print_as_fatal_error
             end
             create Result.e_procedure(n, arguments, obsolete_mark, header_comment, require_assertion, local_vars, routine_body, assigned, index_list, has_closures)
-         elseif assigned /= Void then
-            error_handler.add_position(assigned.start_position)
-            error_handler.append(once "A function cannot be an assigner.")
-            error_handler.print_as_fatal_error
          else
+            if assigned /= Void then
+               error_handler.add_position(assigned.start_position)
+               error_handler.append(once "A function cannot be an assigner.")
+               error_handler.print_as_fatal_error
+            end
             create Result.e_function(n, arguments, type, obsolete_mark, header_comment, require_assertion, local_vars, routine_body, routine_then, index_list, has_closures)
          end
       end
@@ -473,7 +475,7 @@ end -- class TMP_FEATURE
 -- received a copy of the GNU General Public License along with Liberty Eiffel; see the file COPYING. If not, write to the Free
 -- Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 --
--- Copyright(C) 2011-2015: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
+-- Copyright (C) 2011-2016: Cyril ADRIAN, Paolo REDAELLI, Raphael MACK
 --
 -- http://www.gnu.org/software/liberty-eiffel/
 --
