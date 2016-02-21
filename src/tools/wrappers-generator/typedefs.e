@@ -20,7 +20,7 @@ inherit
 
 insert
    SHARED_SETTINGS
-   SHARED_COLLECTIONS
+   SHARED_COLLECTIONS 
 
 create {ANY}
    make
@@ -34,8 +34,8 @@ feature {ANY}
       do
          create path.make_from_string(directory)
          path.add_last(settings.typedefs.as_lower + once ".e")
-         log(once "Outputting anchor queries (for typedefs) into @(1) on `@(2)'.%N",
-         <<settings.typedefs, path.to_string>>)
+         log(once "Outputting anchor queries (for typedefs) into #(1) on `#(2)'.%N" 
+		 	# settings.typedefs # path.to_string )
 
          create {TEXT_FILE_WRITE} file.connect_to(path.to_string)
 
@@ -57,7 +57,7 @@ feature {ANY}
          file.put_string(footer)
          file.disconnect
          file := Void
-         log_string(once " done.%N")
+         log(once " done.%N")
       end
 
    emit_variable_sized_typedefs
@@ -307,7 +307,8 @@ feature {} -- Actual size queries
       end
 
 end -- class TYPEDEFS
--- Copyright (C) 2008-2016: ,2009,2010 Paolo Redaelli
+
+-- Copyright (C) 2008-2016: Paolo Redaelli
 -- wrappers-generator  is free software: you can redistribute it and/or modify it
 -- under the terms of the GNU General Public License as publhed by the Free
 -- Software Foundation, either version 2 of the License, or (at your option)

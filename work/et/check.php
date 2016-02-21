@@ -393,6 +393,71 @@ if (substage("TestSuite")) {
    endsubstage();
 }
 
+if (substage("wrappers")) {
+   if (substage("generate wrappers")) {
+      $wrapperresult = execute("cd $LibertyBase/src/wrappers && make", $ulimit_time = 3600);
+      endsubstage();
+   }
+
+   if (substage("compile examples")) {
+      $result = 0;
+      foreach (glob("$LibertyBase/src/wrappers/*/examples/*_example.e") as $filename) {
+         if (is_file($filename) && preg_match("/(.*)\.e$/", $filename)) {
+            $class = strtoupper(basename($filename, ".e"));
+            $dir = dirname($filename);
+            
+            if (substage($class)) {
+               $ret = execute("cd $dir && se c --clean " . $class, $ulimit_time = 3600);
+
+               if ($ret > 0) {
+                  $curRes = $ret;
+               } else {
+                  $warnCnt = exec("grep " . escapeshellarg("Warning:") . " " . escapeshellarg($stagedir . "/err.txt") . " | wc -l");
+                  $curRes = -$warnCnt;
+               }
+               if ($curRes <= 0) {
+                  if ($result <= 0) {
+                     $result += $curRes;
+                  }
+               } else {
+                  if ($result >= 0) {
+                     $result += $curRes;
+                  } else {
+                     $result = $curRes;
+                  }
+               }
+               file_put_contents($stagedir ."/result.txt", $curRes);
+
+               endsubstage();
+            }
+         }
+      }
+      file_put_contents($stagedir ."/result.txt", $result);
+
+      if(   ($wrapperresult >= 0 && $result > 0)
+         || ($wrapperresult <= 0 && $result < 0))
+      {
+         $wrapperresult += $result;
+      }
+      endsubstage();
+   }
+
+   if (substage("cleanup wrappers")) {
+      $result = execute("cd $LibertyBase && git checkout -- src/wrappers", $ulimit_time = 3600);
+      if(   ($wrapperresult >= 0 && $result > 0)
+         || ($wrapperresult <= 0 && $result < 0))
+      {
+         $wrapperresult += $result;
+      }
+
+      endsubstage();
+   }
+   
+   file_put_contents($stagedir ."/result.txt", $wrapperresult);
+   endsubstage();
+}
+
+
 file_put_contents("$stageout/current_stage.txt","");
 
 $times = recordTime($times, "", (int)(time() - $startTime), $historysize);

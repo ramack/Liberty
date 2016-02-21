@@ -192,7 +192,7 @@ short: short
 test: eiffeltest
 test_ng: eiffeltest_ng
 test_server: eiffeltest_server
-wrap: wrappers-generator
+wrap: wrappers_generator
 x_int: extract_internals
 
 [boost]
@@ -212,7 +212,7 @@ cpp_linker_options: -Xlinker -${hyphen}no-as-needed
 [no_check]
 c_compiler_type: $CC_TYPE
 c_compiler_path: $CC
-c_compiler_options: -pipe -O1
+c_compiler_options: -pipe -O1 -fno-gcse
 c_linker_path: $CC
 c_linker_options: -Xlinker -${hyphen}no-as-needed
 cpp_compiler_type: g++
@@ -224,7 +224,7 @@ cpp_linker_options: -Xlinker -${hyphen}no-as-needed
 [require_check]
 c_compiler_type: $CC_TYPE
 c_compiler_path: $CC
-c_compiler_options: -pipe
+c_compiler_options: -pipe -O1 -fno-gcse
 c_linker_path: $CC
 c_linker_options: -Xlinker -${hyphen}no-as-needed
 cpp_compiler_type: g++
@@ -236,7 +236,7 @@ cpp_linker_options: -Xlinker -${hyphen}no-as-needed
 [ensure_check]
 c_compiler_type: $CC_TYPE
 c_compiler_path: $CC
-c_compiler_options: -pipe
+c_compiler_options: -pipe -O1 -fno-gcse
 c_linker_path: $CC
 c_linker_options: -Xlinker -${hyphen}no-as-needed
 cpp_compiler_type: g++
@@ -248,7 +248,7 @@ cpp_linker_options: -Xlinker -${hyphen}no-as-needed
 [invariant_check]
 c_compiler_type: $CC_TYPE
 c_compiler_path: $CC
-c_compiler_options: -pipe
+c_compiler_options: -pipe -O1 -fno-gcse
 c_linker_path: $CC
 c_linker_options: -Xlinker -${hyphen}no-as-needed
 cpp_compiler_type: g++
@@ -260,7 +260,7 @@ cpp_linker_options: -Xlinker -${hyphen}no-as-needed
 [loop_check]
 c_compiler_type: $CC_TYPE
 c_compiler_path: $CC
-c_compiler_options: -pipe
+c_compiler_options: -pipe -O1 -fno-gcse
 c_linker_path: $CC
 c_linker_options: -Xlinker -${hyphen}no-as-needed
 cpp_compiler_type: g++
@@ -272,7 +272,7 @@ cpp_linker_options: -Xlinker -${hyphen}no-as-needed
 [all_check]
 c_compiler_type: $CC_TYPE
 c_compiler_path: $CC
-c_compiler_options: -pipe
+c_compiler_options: -pipe -O1 -fno-gcse
 c_linker_path: $CC
 c_linker_options: -Xlinker -${hyphen}no-as-needed
 cpp_compiler_type: g++
@@ -284,7 +284,7 @@ cpp_linker_options: -Xlinker -${hyphen}no-as-needed
 [debug_check]
 c_compiler_type: $CC_TYPE
 c_compiler_path: $CC
-c_compiler_options: -pipe -g
+c_compiler_options: -pipe -g -O1 -fno-gcse
 c_linker_path: $CC
 c_linker_options: -Xlinker -${hyphen}no-as-needed
 cpp_compiler_type: g++
@@ -410,10 +410,10 @@ EOF
 5  no  se
 6  bdw clean
 7  bdw ace_check
-8  no  eiffeltest
+8  bdw eiffeltest
 9  no  mock
-#9  bdw eiffeltest_ng
-#10 bdw eiffeltest_server
+9  bdw eiffeltest_ng
+10 bdw eiffeltest_server
 EOF
     {
         grep -v '^#' |
@@ -436,6 +436,7 @@ EOF
 14 no  finder
 15 bdw  eiffeldoc
 16 no  extract_internals
+17 bdw  wrappers_generator
 EOF
 
     {
@@ -491,12 +492,12 @@ compile_plugins() {
 generate_wrappers() {
     title "Generating wrappers"
     cd $TARGET/bin
-    cd wrappers-generator.d
+    cd wrappers_generator.d
     n=$(ls $LIBERTY_HOME/src/wrappers/*/library/externals/Makefile | wc -l)
     n=$((n+1))
     progress 30 0 $n "Building the wrappers generator"
-    run ../se c -verbose wrappers-generator.ace
-    cd .. && test -e wrappers-generator || ln -s wrappers-generator.d/wrappers-generator .
+    run ../se c -verbose wrappers_generator.ace
+    cd .. && test -e wrappers_generator || ln -s wrappers_generator.d/wrappers_generator .
     i=1
     for f in $(ls $LIBERTY_HOME/src/wrappers/*/library/externals/Makefile); do
         cd ${f%/Makefile}
@@ -610,7 +611,7 @@ short: short
 test: eiffeltest
 test_ng: eiffeltest_ng
 test_server: eiffeltest_server
-wrap: wrappers-generator
+wrap: wrappers_generator
 x_int: extract_internals
 
 [boost]

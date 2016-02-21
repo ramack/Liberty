@@ -606,9 +606,6 @@ feature {}
       local
          buf: like buffer
       do
-         io.put_string(once "connect_buffer(%"")
-         io.put_string(a_url.out)
-         io.put_string(once "%", ")
          if a_face_url = Void then
             io.put_string(once "Void")
          else
@@ -682,8 +679,6 @@ feature {}
       require
          not open_buffers.is_empty
       do
-         io.put_line(once "disconnect_buffer")
-
          buffer.disconnect
          if open_buffers.top.entity /= Void then
             callbacks.close_entity_url(open_buffers.top.entity, open_buffers.top.url)
@@ -713,7 +708,7 @@ end -- class XML_PARSER
 -- of this software and associated documentation files (the "Software"), to deal
 -- in the Software without restriction, including without limitation the rights
 -- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
--- copies of the Software, and to permit persons to whom the Software
+-- copies of the Software, and to permit persons to whom the Software is
 -- furnished to do so, subject to the following conditions:
 --
 -- The above copyright notice and this permission notice shall be included in

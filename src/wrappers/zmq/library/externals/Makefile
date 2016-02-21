@@ -3,7 +3,7 @@ HEADER=plugin/c/zmq_liberty.h
 HEADERS=/usr/include/zmq.h
 
 wrappers: $(XML)
-	wrappers-generator --local  $(XML) $(HEADERS)
+	wrappers_generator --local  $(XML) $(HEADERS)
 
 ## Previous versions used
 ## `pkg-config --cflags-only-I libzmq| cut -c 3- |tr --delete  '[:space:]' `/zmq.h 
@@ -15,7 +15,7 @@ wrappers: $(XML)
 
 $(XML): 
 	pkg-config --exists libzmq --atleast-version=2.1.9
-	gccxml `pkg-config --cflags libzmq` $(HEADER) -fxml=$(XML)
+	castxml --castxml-gccxml -x c++  `pkg-config --cflags libzmq` $(HEADER) -o $(XML)
 
 
 
