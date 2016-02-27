@@ -22,7 +22,7 @@ feature {ANY}
             container_type.fields.add_last(Current)
          else
             -- Fields may be part of a composed type that will be not be wrapped, for example PThread structures when wrapping GObject introspection facilities. Therefore its container will not be present in the composed types!
-            log("Ignoring field @(1) of @(2) in %"@(3)%"%N" # c_string_name # context.to_utf8)
+            log("Ignoring field #(1) of #(2) in %"#(3)%"%N" # c_string_name # context.to_utf8)
          end
       end
 
@@ -69,13 +69,13 @@ feature {ANY}
          setter, getter, getter_description, setter_description: STRING; eiffel_field: ABSTRACT_STRING
       do
 		  if is_anonymous then
-			  log(once "Anonymous field in structure #(1) at line #(2): not wrappable." # a_structure_name # &line_row)
+			  log(once "Anonymous field in #(1) at line #(2): not wrappable." # a_structure_name # &line_row)
 			  queries.append(once "%T-- Anonymous field at line #(1).%N" # &line_row)
 		  elseif not is_public then
-			  log(once "private field #(1) in structure #(2) not wrapped." # c_string_name # a_structure_name)
+			  log(once "Private field #(1) in #(2) not wrapped." # c_string_name # a_structure_name)
 			  queries.append(once "%T-- Unwrapped private field #(1).%N" # c_string_name)
 		  elseif not has_wrapper then
-			  log(once "Field #(1) in structure #(2) doesn't have a wrapper." # c_string_name # a_structure_name)
+			  log(once "Field #(1) in #(2) doesn't have a wrapper." # c_string_name # a_structure_name)
 			  queries.append(once "%T-- Unwrappable field #(1).%N"#c_string_name)
 			  -- doesn't have a valid wrapper
 		  else -- we can actually wrap it

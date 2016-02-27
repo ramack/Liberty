@@ -12,6 +12,8 @@ LIBRARIES=common \
 	  readline \
 	  xml \
 	  zmq
+SUBMAKEFILES := $(shell find $(LIBRARIES) -name Makefile)
+
 
 ## Not working wrappers: llvm
 
@@ -34,10 +36,11 @@ update: $(LIBRARIES)
 
 clean: 
 	@echo Removing generated files
-	rm */library/externals/*.gcc-xml
-	rm */library/externals/*.e
-	rm */library/externals/plugin/c/plugin.[ch]
+	rm */library/externals/generated/*.gcc-xml
+	rm */library/externals/generated/*.e
+	rm */library/externals/generated/plugin/c/plugin.[ch]
 
 $(LIBRARIES) : 
 	@echo Updating generated classes of $@
-	@$(MAKE) -C $@/library/externals
+	@$(MAKE) -C $@/library/externals/
+	@$(MAKE) -C $@/library/externals/generated
