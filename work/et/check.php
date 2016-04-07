@@ -268,7 +268,7 @@ function tutorialDir($dir) {
             if ($ret > 0) {
                $curRes = $ret;
             } else {
-               $curRes = 0 - exec("grep -i" . escapeshellarg("Warning:") . " " . escapeshellarg($stagedir . "/err.txt") . " | wc -l");
+               $curRes = 0 - exec("grep -i " . escapeshellarg("Warning:") . " " . escapeshellarg($stagedir . "/err.txt") . " | wc -l");
             }
             if ($curRes > 0 || $result == 0) {
                $result = $curRes;
@@ -415,6 +415,7 @@ if (substage("TestSuite")) {
 
 // generate the wrapper $name
 function genWrapper($name) {
+   global $LibertyBase;
    $result = 0;
 
    if (substage($name)) {
@@ -425,7 +426,7 @@ function genWrapper($name) {
 }
 
 if (substage("wrappers")) {
-
+   $wrapperresult = 0;
    if (substage("generate wrappers")) {
       $genresult =                        genWrapper("common");
       $genresult = warnErrAdd($genresult, genWrapper("ffi"));
@@ -434,6 +435,9 @@ if (substage("wrappers")) {
       $genresult = warnErrAdd($genresult, genWrapper("readline"));
       $genresult = warnErrAdd($genresult, genWrapper("xml"));
       $genresult = warnErrAdd($genresult, genWrapper("zmq"));
+      $wrapperresult = $genresult;
+      
+      file_put_contents($stagedir ."/result.txt", $wrapperresult);
       endsubstage();
    }
 
@@ -445,7 +449,7 @@ if (substage("wrappers")) {
             $dir = dirname($filename);
             
             if (substage($class)) {
-               $ret = execute("cd $dir && se c --clean " . $class, $ulimit_time = 3600);
+               $ret = execute("cd $dir && se c --clean -o " . strtolower(basename($filename, ".e")) . " " . $class, $ulimit_time = 3600);
 
                if ($ret > 0) {
                   $curRes = $ret;
@@ -453,40 +457,22 @@ if (substage("wrappers")) {
                   $warnCnt = exec("grep -i " . escapeshellarg("Warning:") . " " . escapeshellarg($stagedir . "/err.txt") . " | wc -l");
                   $curRes = -$warnCnt;
                }
-               if ($curRes <= 0) {
-                  if ($result <= 0) {
-                     $result += $curRes;
-                  }
-               } else {
-                  if ($result >= 0) {
-                     $result += $curRes;
-                  } else {
-                     $result = $curRes;
-                  }
-               }
                file_put_contents($stagedir ."/result.txt", $curRes);
+               $result =  warnErrAdd($result, $curRes);
 
                endsubstage();
             }
          }
       }
       file_put_contents($stagedir ."/result.txt", $result);
+      $wrapperresult =  warnErrAdd($wrapperresult, $result);
 
-      if(   ($wrapperresult >= 0 && $result > 0)
-         || ($wrapperresult <= 0 && $result < 0))
-      {
-         $wrapperresult += $result;
-      }
       endsubstage();
    }
 
    if (substage("cleanup wrappers")) {
-      $result = execute("cd $LibertyBase && git checkout -- src/wrappers", $ulimit_time = 3600);
-      if(   ($wrapperresult >= 0 && $result > 0)
-         || ($wrapperresult <= 0 && $result < 0))
-      {
-         $wrapperresult += $result;
-      }
+      $result = execute("cd $LibertyBase && git checkout -f -- src/wrappers", $ulimit_time = 3600);
+      $wrapperresult =  warnErrAdd($wrapperresult, $result);
 
       endsubstage();
    }
